@@ -1,0 +1,14 @@
+# 範例:切換到 LSTM 架構(接上原 notebook 註解掉的 LSTM(64) 實驗)。
+# 用法: urlguard train --config configs/default.yaml --set model.type=lstm
+# 或直接以此檔為基礎另存 default 覆蓋。此檔僅列出與 default 不同之處供參考。
+seed: 42
+
+model:
+  type: lstm
+  embedding_dim: 32
+  lstm_units: 64
+  dropout: 0.2
+
+train:
+  epochs: 5
+  batch_size: 64

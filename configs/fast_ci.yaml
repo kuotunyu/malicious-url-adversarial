@@ -1,0 +1,49 @@
+# 極小配置:供 CI / 單元測試在數秒內端到端跑完,絕不下載 Kaggle 資料。
+# 搭配 tests/fixtures/sample_urls.csv 使用。
+seed: 42
+artifacts_dir: artifacts
+images_dir: docs/images
+
+data:
+  dataset: sid321axn/malicious-urls-dataset
+  csv_name: sample_urls.csv   # 直接讀 committed fixture,不下載 Kaggle
+  raw_dir: tests/fixtures
+  downsample: true
+
+features:
+  vocab_size: 200
+  max_length: 32
+  oov_token: "<OOV>"
+  char_level: true
+  lowercase: true
+  padding: post
+  truncating: post
+
+model:
+  type: dense_pool
+  embedding_dim: 8
+  dense_units: 8
+  lstm_units: 8
+  dropout: 0.0
+
+train:
+  epochs: 1
+  batch_size: 16
+  test_size: 0.3
+  stratify: true
+  threshold: 0.5
+  learning_rate: 0.01
+
+attack:
+  method: fgsm
+  epsilon: 0.2
+  sweep: [0.0, 0.1, 0.3]
+  pgd_steps: 3
+  pgd_alpha: 0.05
+  confidence_threshold: 0.5
+
+defense:
+  method: fgsm
+  epsilon: 0.2
+  adv_weight: 0.5
+  epochs: 1

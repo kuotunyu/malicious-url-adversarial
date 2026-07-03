@@ -1,0 +1,6 @@
+# 統一使用 LF,避免 Windows/Linux 換行差異造成的 diff 雜訊
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+*.keras binary

@@ -1,0 +1,38 @@
+# === 資料與模型產物(絕不入 git)===
+data/
+artifacts/
+*.keras
+*.h5
+*.weights.h5
+
+# 允許測試用的小 fixture(明確反向排除)
+!tests/fixtures/
+!tests/fixtures/**
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# === 工具快取 ===
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# === Notebook ===
+.ipynb_checkpoints/
+
+# === 環境與 IDE ===
+.env
+.idea/
+.vscode/
+.DS_Store

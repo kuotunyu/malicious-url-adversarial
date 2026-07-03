@@ -1,0 +1,48 @@
+# 全專案唯一的超參數來源。CLI 每個指令都吃 --config,並可用 --set key=value 覆蓋。
+seed: 42
+artifacts_dir: artifacts
+images_dir: docs/images
+
+data:
+  dataset: sid321axn/malicious-urls-dataset   # Kaggle dataset id
+  csv_name: malicious_phish.csv
+  raw_dir: data/raw
+  downsample: true                             # 降採樣良性樣本至與惡意同量,強迫模型學特徵
+
+features:
+  vocab_size: 5000        # 字元字典上限(char-level URL 實際遠小於此,設大只是安全上界)
+  max_length: 100         # 只看網址前 100 個字元(涵蓋絕大多數 URL)
+  oov_token: "<OOV>"      # 未見字元標記
+  char_level: true        # 字元層級:比單字更能抓 g00gle 這類混淆
+  lowercase: true
+  padding: post           # 不足補在後面
+  truncating: post        # 過長從後面截斷
+
+model:
+  type: dense_pool        # dense_pool(輕量基線) 或 lstm
+  embedding_dim: 16
+  dense_units: 24
+  lstm_units: 64
+  dropout: 0.0
+
+train:
+  epochs: 5               # 講座用 5;實測第 5 epoch val_acc≈0.94
+  batch_size: 32
+  test_size: 0.2
+  stratify: true          # 分層抽樣,確保 train/test 類別比例一致
+  threshold: 0.5          # 二元判定門檻
+  learning_rate: 0.001
+
+attack:
+  method: fgsm            # fgsm 或 pgd
+  epsilon: 0.05           # 單點攻擊強度
+  sweep: [0.0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3]  # epsilon 掃描點
+  pgd_steps: 10
+  pgd_alpha: 0.01
+  confidence_threshold: 0.9  # 只挑模型高信心(>0.9)的惡意樣本來攻擊
+
+defense:
+  method: fgsm            # 對抗訓練時生成擾動的方法(fgsm/pgd)
+  epsilon: 0.1
+  adv_weight: 0.5         # 每批 loss = (1-w)*乾淨 + w*對抗
+  epochs: 5
