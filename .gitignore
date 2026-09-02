@@ -1,6 +1,7 @@
 # === 資料與模型產物(絕不入 git)===
-data/
-artifacts/
+# 只忽略 repo 根目錄的 data/(下載的資料集);src/urlguard/data/ 是套件原始碼,必須進 git
+/data/
+/artifacts/
 *.keras
 *.h5
 *.weights.h5
