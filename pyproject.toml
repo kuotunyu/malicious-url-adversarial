@@ -9,7 +9,7 @@ description = "惡意網址偵測 + 對抗式攻防 (FGSM / PGD / 對抗訓練) 
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Your Name" }]
+authors = [{ name = "kuotunyu" }]
 keywords = ["adversarial-ml", "security", "phishing", "fgsm", "pgd", "tensorflow"]
 dependencies = [
     "numpy>=1.24",
@@ -40,7 +40,7 @@ app = [
 urlguard = "urlguard.cli:app"
 
 [project.urls]
-Repository = "https://github.com/your-account/malicious-url-adversarial"
+Repository = "https://github.com/kuotunyu/malicious-url-adversarial"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -50,6 +50,7 @@ urlguard = ["py.typed"]
 
 [tool.ruff]
 line-length = 100
+extend-exclude = ["notebooks"]  # 原始講座 notebook 刻意保留原貌，不納入 lint
 target-version = "py310"
 src = ["src", "tests"]
 

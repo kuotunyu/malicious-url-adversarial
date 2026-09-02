@@ -99,7 +99,7 @@ def plot_attack_bar(orig_prob: float, adv_prob: float, epsilon: float, path: str
     ax.set_ylim(0, 1.1)
     ax.set_ylabel("Malicious probability")
     ax.set_title(f"FGSM Attack (epsilon={epsilon})")
-    for b, p in zip(bars, probs):
+    for b, p in zip(bars, probs, strict=True):
         ax.text(b.get_x() + b.get_width() / 2, p + 0.02, f"{p:.1%}", ha="center", fontweight="bold")
     ax.legend()
     return _save(fig, path)
@@ -122,9 +122,7 @@ def plot_epsilon_sweep(sweeps: dict[str, dict], path: str | Path) -> Path:
     return _save(fig, path)
 
 
-def plot_robustness_comparison(
-    sweep_vanilla: dict, sweep_robust: dict, path: str | Path
-) -> Path:
+def plot_robustness_comparison(sweep_vanilla: dict, sweep_robust: dict, path: str | Path) -> Path:
     """防禦前後對照:vanilla vs adversarially-trained 的攻擊成功率曲線。"""
     return plot_epsilon_sweep(
         {"vanilla": sweep_vanilla, "adversarially-trained": sweep_robust}, path

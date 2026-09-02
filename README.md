@@ -3,8 +3,7 @@
 以深度學習偵測惡意/釣魚網址,並實作 **FGSM / PGD 對抗式攻擊**與**對抗訓練防禦**,
 完整走一遍「**訓練 → 攻擊 → 量化 → 防禦 → 再量化**」的資安攻防閉環。
 
-<!-- 把 your-account 換成你的 GitHub 帳號後,badges 即會生效 -->
-![CI](https://github.com/your-account/malicious-url-adversarial/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/kuotunyu/malicious-url-adversarial/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.20-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -78,13 +77,16 @@ urlguard serve
 
 在平衡測試集上(`configs/default.yaml`,5 epochs):
 
-| 指標 | 數值 |
+| 指標 | 數值（2026-09-02 實測，`artifacts/eval_metrics.json`） |
 |---|---|
-| Accuracy | ~0.94 |
-| Precision (malicious) | ~0.94 |
-| Recall (malicious) | ~0.94 |
-| F1 (malicious) | ~0.94 |
-| ROC-AUC / PR-AUC | 執行 `urlguard evaluate` 後產生 |
+| Accuracy | 0.9376 |
+| Precision (malicious) | 0.9348 |
+| Recall (malicious) | 0.9408 |
+| F1 (malicious) | 0.9378 |
+| ROC-AUC / PR-AUC | 0.9802 / 0.9808 |
+| Recall @ FPR = 1% | 0.7842（threshold 0.914） |
+
+測試集 89,236 筆（良性／惡意各 44,618）；混淆矩陣 TN 41,690、FP 2,928、FN 2,642、TP 41,976。
 
 > 圖表由 `urlguard evaluate` 產生於 `docs/images/`:
 
@@ -118,8 +120,10 @@ $$adv = emb + \epsilon \cdot \text{sign}(\nabla_{emb} J(\theta, emb, y))$$
 
 | 模型 | 乾淨 Accuracy | Robust Acc (FGSM, ε=0.1) | Robust Acc (PGD, ε=0.1) |
 |---|---|---|---|
-| Vanilla | 執行 `urlguard adv-train` 後產生 | | |
-| 對抗訓練 | | | |
+| Vanilla | 0.9376 | 0.1061 | 0.0667 |
+| 對抗訓練（FGSM，ε=0.1，adv_weight 0.5，5 epochs） | 0.9359 | **0.9143** | **0.8901** |
+
+2026-09-02 實測（`artifacts/defense_results.json`）。對抗訓練用乾淨準確率 −0.17 個百分點，換到 FGSM robust accuracy +80.8 個百分點；對沒訓練過的 PGD（10 步）也有 +82.3 個百分點的移轉效果。同一條 epsilon 掃描下，vanilla 在 ε=0.1 的攻擊成功率 85.2%，對抗訓練後降到 4.5%，要到 ε=0.3 才回升至 40.3%。
 
 <p><img src="docs/images/robustness_before_after.png" width="480" alt="Robustness before/after"></p>
 
@@ -130,7 +134,7 @@ $$adv = emb + \epsilon \cdot \text{sign}(\nabla_{emb} J(\theta, emb, y))$$
 `urlguard serve` 會啟動 Streamlit:輸入 URL → 即時惡意機率 + 🔴/🟢 判定;
 再用 epsilon slider 對該 URL 即時施加 FGSM/PGD 擾動,並排顯示原始 vs 對抗機率。
 
-<p><img src="docs/images/demo.gif" width="560" alt="Streamlit demo"></p>
+<p><img src="docs/images/demo.png" width="560" alt="Streamlit demo"></p>
 
 ## 專案結構
 

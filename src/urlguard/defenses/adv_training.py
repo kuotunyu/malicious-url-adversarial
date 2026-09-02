@@ -81,7 +81,7 @@ def adversarial_train(
             adv_pred = classifier(emb + perturb, training=True)
             loss = (1.0 - w) * loss_obj(yb, clean_pred) + w * loss_obj(yb, adv_pred)
         grads = tape.gradient(loss, model.trainable_variables)
-        optimizer.apply_gradients(zip(grads, model.trainable_variables))
+        optimizer.apply_gradients(zip(grads, model.trainable_variables, strict=True))
         return loss
 
     for epoch in range(d.epochs):

@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -30,7 +29,7 @@ ConfigOpt = typer.Option("configs/default.yaml", "--config", "-c", help="設定�
 SetOpt = typer.Option(None, "--set", help="覆蓋設定,可重複。例: --set attack.epsilon=0.1")
 
 
-def _load(config: str, set_: Optional[list[str]]):
+def _load(config: str, set_: list[str] | None):
     cfg = load_config(config, overrides=set_)
     return cfg
 
@@ -47,7 +46,7 @@ def version() -> None:
 
 
 @app.command("download-data")
-def download_data(config: str = ConfigOpt, set_: Optional[list[str]] = SetOpt) -> None:
+def download_data(config: str = ConfigOpt, set_: list[str] | None = SetOpt) -> None:
     """從 Kaggle 下載資料集到 data.raw_dir(冪等)。"""
     from urlguard.data.download import download_dataset
 
@@ -57,7 +56,7 @@ def download_data(config: str = ConfigOpt, set_: Optional[list[str]] = SetOpt) -
 
 
 @app.command()
-def train(config: str = ConfigOpt, set_: Optional[list[str]] = SetOpt) -> None:
+def train(config: str = ConfigOpt, set_: list[str] | None = SetOpt) -> None:
     """訓練模型並儲存 artifacts。"""
     from urlguard.model.train import train as run_train
 
@@ -72,7 +71,7 @@ def train(config: str = ConfigOpt, set_: Optional[list[str]] = SetOpt) -> None:
 
 
 @app.command()
-def evaluate(config: str = ConfigOpt, set_: Optional[list[str]] = SetOpt) -> None:
+def evaluate(config: str = ConfigOpt, set_: list[str] | None = SetOpt) -> None:
     """載入已訓練模型,輸出混淆矩陣 / ROC / PR 圖與指標。"""
     from urlguard.evaluation import plots
     from urlguard.evaluation.metrics import classification_metrics, recall_at_fpr
@@ -102,7 +101,7 @@ def evaluate(config: str = ConfigOpt, set_: Optional[list[str]] = SetOpt) -> Non
 @app.command()
 def attack(
     config: str = ConfigOpt,
-    set_: Optional[list[str]] = SetOpt,
+    set_: list[str] | None = SetOpt,
     method: str = typer.Option("fgsm", help="fgsm 或 pgd"),
     sweep: bool = typer.Option(True, help="是否做 epsilon 掃描"),
 ) -> None:
@@ -135,8 +134,12 @@ def attack(
     single_y = y_target[:1]
     if method == "pgd":
         single = pgd_attack(
-            model, single_x, single_y, cfg.attack.epsilon,
-            steps=cfg.attack.pgd_steps, alpha=cfg.attack.pgd_alpha,
+            model,
+            single_x,
+            single_y,
+            cfg.attack.epsilon,
+            steps=cfg.attack.pgd_steps,
+            alpha=cfg.attack.pgd_alpha,
         )
     else:
         single = fgsm_attack(model, single_x, single_y, cfg.attack.epsilon)
@@ -148,9 +151,14 @@ def attack(
 
     if sweep:
         sweep_res = epsilon_sweep(
-            model, x_target, y_target, cfg.attack.sweep,
-            threshold=cfg.train.threshold, method=method,
-            pgd_steps=cfg.attack.pgd_steps, pgd_alpha=cfg.attack.pgd_alpha,
+            model,
+            x_target,
+            y_target,
+            cfg.attack.sweep,
+            threshold=cfg.train.threshold,
+            method=method,
+            pgd_steps=cfg.attack.pgd_steps,
+            pgd_alpha=cfg.attack.pgd_alpha,
         )
         out["sweep"] = sweep_res
         plots.plot_epsilon_sweep({method: sweep_res}, cfg.images_path / "epsilon_sweep.png")
@@ -167,8 +175,8 @@ def attack(
 @app.command("adv-train")
 def adv_train(
     config: str = ConfigOpt,
-    set_: Optional[list[str]] = SetOpt,
-    epsilon: Optional[float] = typer.Option(None, help="覆蓋 defense.epsilon"),
+    set_: list[str] | None = SetOpt,
+    epsilon: float | None = typer.Option(None, help="覆蓋 defense.epsilon"),
 ) -> None:
     """對抗訓練,並比較防禦前後 robustness。"""
     from urlguard.defenses.adv_training import adversarial_train, robustness_report
@@ -205,7 +213,7 @@ def adv_train(
         rep_base["sweep"], rep_robust["sweep"], cfg.images_path / "robustness_before_after.png"
     )
 
-    typer.echo("--- 防禦前後對照(eps=%.3f)---" % cfg.defense.epsilon)
+    typer.echo(f"--- 防禦前後對照(eps={cfg.defense.epsilon:.3f})---")
     for rep in (rep_base, rep_robust):
         typer.echo(
             f"  {rep['label']:<24} clean_acc={rep['clean_accuracy']:.4f}  "
@@ -217,7 +225,7 @@ def adv_train(
 @app.command()
 def serve(
     config: str = ConfigOpt,
-    set_: Optional[list[str]] = SetOpt,
+    set_: list[str] | None = SetOpt,
     port: int = typer.Option(8501, help="Streamlit 埠號"),
 ) -> None:
     """啟動 Streamlit demo(需要 pip install .[app])。"""
