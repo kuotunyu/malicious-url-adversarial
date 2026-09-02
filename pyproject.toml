@@ -74,3 +74,6 @@ testpaths = ["tests"]
 addopts = "-q"
 pythonpath = ["src"]
 filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["urlguard"]  # Linux CI 與 Windows 本機對 first-party 的偵測不同步，明確宣告
