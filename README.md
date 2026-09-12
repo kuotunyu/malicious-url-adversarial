@@ -8,8 +8,7 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.20-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> 🔗 線上 Demo:_部署到 [Streamlit Community Cloud](https://streamlit.io/cloud) 後把連結貼在這裡_
-> (本機執行:`urlguard serve`)
+> 本機 Demo：`urlguard serve`。本 README 尚未提供已部署的線上 Demo 網址。
 
 ---
 
